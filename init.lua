@@ -172,6 +172,7 @@ vim.o.confirm = true
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+vim.keymap.set('n', '<C-s>', '<cmd>w<CR>', { desc = 'Save file' })
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
@@ -893,6 +894,17 @@ require('lazy').setup({
       })
     end,
   },
+  {
+    'nvzone/typr',
+    dependencies = 'nvzone/volt',
+    opts = {},
+    cmd = { 'Typr', 'TyprStats' },
+  },
+  {
+    'mrcjkb/rustaceanvim',
+    version = '^6', -- Recommended
+    lazy = false, -- This plugin is already lazy
+  },
 
   -- NOTE: Plugins can specify dependencies.
   --
@@ -1214,10 +1226,13 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
+        html = {},
+        cssls = {},
+        gopls = {},
+        pyright = {},
+        ts_ls = {},
+        bashls = {},
+        clangd = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -1311,13 +1326,46 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        css = { 'prettier' },
+        html = { 'prettier' },
+        go = { 'gofumpt', 'goimports_reviser' },
+        python = function(bufnr)
+          if require('conform').get_formatter_info('ruff_format', bufnr).available then
+            return { 'mypy', 'ruff_format' }
+          else
+            return { 'mypy', 'isort', 'black' }
+          end
+        end,
+        typescript = { 'eslint', 'prettier' },
+        javascript = { 'eslint', 'prettier' },
+        bash = { 'shfmt' },
+        c = { 'clangd' },
+        cpp = { 'clangd' },
+        rust = { 'rustfmt' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
       },
+      format_on_save = {
+        -- These options will be passed to conform.format()
+        timeout_ms = 500,
+        lsp_fallback = true,
+      },
     },
+  },
+
+  {
+    'olexsmir/gopher.nvim',
+    ft = 'go',
+    -- branch = "develop"
+    -- (optional) will update plugin's deps on every update
+    build = function()
+      vim.cmd.GoInstallDeps()
+    end,
+    ---@type gopher.Config
+    opts = {},
   },
 
   { -- Autocompletion
@@ -1378,7 +1426,7 @@ require('lazy').setup({
         -- <c-k>: Toggle signature help
         --
         -- See :h blink-cmp-config-keymap for defining your own keymap
-        preset = 'default',
+        preset = 'super-tab',
 
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -1393,7 +1441,7 @@ require('lazy').setup({
       completion = {
         -- By default, you may press `<c-space>` to show the documentation.
         -- Optionally, set `auto_show = true` to show the documentation after a delay.
-        documentation = { auto_show = false, auto_show_delay_ms = 500 },
+        documentation = { auto_show = true, auto_show_delay_ms = 500 },
       },
 
       sources = {
@@ -1487,7 +1535,27 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = {
+        'vim',
+        'lua',
+        'vimdoc',
+        'html',
+        'css',
+        'c',
+        'go',
+        'python',
+        'javascript',
+        'typescript',
+        'yaml',
+        'json',
+        'toml',
+        'bash',
+        'gomod',
+        'gosum',
+        'dockerfile',
+        'nginx',
+        'make',
+      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
