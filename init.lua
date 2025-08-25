@@ -351,6 +351,22 @@ require('lazy').setup({
       },
     },
   },
+  -- lazy.nvim
+  {
+    'folke/noice.nvim',
+    event = 'VeryLazy',
+    opts = {
+      -- add any options here
+    },
+    dependencies = {
+      -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+      'MunifTanjim/nui.nvim',
+      -- OPTIONAL:
+      --   `nvim-notify` is only needed, if you want to use the notification view.
+      --   If not available, we use `mini` as the fallback
+      'rcarriga/nvim-notify',
+    },
+  },
   {
     'folke/snacks.nvim',
     priority = 1000,
@@ -359,7 +375,7 @@ require('lazy').setup({
     opts = {
       bigfile = { enabled = true },
       dashboard = { enabled = true },
-      explorer = { enabled = true },
+      explorer = { enabled = true, hidden = true },
       indent = { enabled = true },
       input = { enabled = true },
       notifier = {
@@ -1328,7 +1344,7 @@ require('lazy').setup({
         lua = { 'stylua' },
         css = { 'prettier' },
         html = { 'prettier' },
-        go = { 'gofumpt', 'goimports_reviser' },
+        go = { 'gofumpt', 'goimports_reviser', 'golines' },
         python = function(bufnr)
           if require('conform').get_formatter_info('ruff_format', bufnr).available then
             return { 'mypy', 'ruff_format' }
@@ -1342,16 +1358,13 @@ require('lazy').setup({
         c = { 'clangd' },
         cpp = { 'clangd' },
         rust = { 'rustfmt' },
+        json = { 'prettier' },
+        yaml = { 'prettier' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
-      },
-      format_on_save = {
-        -- These options will be passed to conform.format()
-        timeout_ms = 500,
-        lsp_fallback = true,
       },
     },
   },
@@ -1359,13 +1372,12 @@ require('lazy').setup({
   {
     'olexsmir/gopher.nvim',
     ft = 'go',
-    -- branch = "develop"
-    -- (optional) will update plugin's deps on every update
-    build = function()
-      vim.cmd.GoInstallDeps()
+    config = function(_, opts)
+      require('gopher').setup(opts)
     end,
-    ---@type gopher.Config
-    opts = {},
+    build = function()
+      vim.cmd [[silent! GoInstallDeps]]
+    end,
   },
 
   { -- Autocompletion
@@ -1480,6 +1492,7 @@ require('lazy').setup({
         styles = {
           comments = { italic = false }, -- Disable italics in comments
         },
+        transparent = true,
       }
 
       -- Load the colorscheme here.
@@ -1510,13 +1523,30 @@ require('lazy').setup({
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
 
+      -- AUTO-PAIRS: Add this section for bracket/quote auto-completion
+      require('mini.pairs').setup {
+        -- In which modes mappings from this `config` should be created
+        modes = { insert = true, command = false, terminal = false },
+
+        -- Skip autopair when next character is one of these
+        skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
+
+        -- Skip autopair when the cursor is inside these treesitter nodes
+        skip_ts = { 'string' },
+
+        -- Skip autopair when next character is closing pair and there are more closing pairs than opening pairs
+        skip_unbalanced = true,
+
+        -- Better deal with markdown code blocks
+        markdown = true,
+      }
+
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
       local statusline = require 'mini.statusline'
       -- set use_icons to true if you have a Nerd Font
       statusline.setup { use_icons = vim.g.have_nerd_font }
-
       -- You can configure sections in the statusline by overriding their
       -- default behavior. For example, here we set the section for
       -- cursor location to LINE:COLUMN
@@ -1524,7 +1554,6 @@ require('lazy').setup({
       statusline.section_location = function()
         return '%2l:%-2v'
       end
-
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
