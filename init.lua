@@ -1290,6 +1290,17 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'stylua', -- Lua formatter
+        'prettier', -- JS/TS/CSS/HTML/JSON/YAML formatter
+        'shfmt', -- Bash formatter
+        'isort',
+        'black', -- Python formatters
+        'ruff', -- Python linter/formatter
+        'gofumpt',
+        'goimports-reviser',
+        'golines', -- Go formatters
+        'clang-format', -- C/C++ formatter (since you’re using clangd as LSP)
+        'rustfmt', -- Rust formatter
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -1330,7 +1341,7 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = {}
         if disable_filetypes[vim.bo[bufnr].filetype] then
           return nil
         else
@@ -1347,16 +1358,16 @@ require('lazy').setup({
         go = { 'gofumpt', 'goimports_reviser', 'golines' },
         python = function(bufnr)
           if require('conform').get_formatter_info('ruff_format', bufnr).available then
-            return { 'mypy', 'ruff_format' }
+            return { 'ruff_format' }
           else
-            return { 'mypy', 'isort', 'black' }
+            return { 'isort', 'black' }
           end
         end,
         typescript = { 'eslint', 'prettier' },
         javascript = { 'eslint', 'prettier' },
         bash = { 'shfmt' },
-        c = { 'clangd' },
-        cpp = { 'clangd' },
+        c = { 'clang-format' },
+        cpp = { 'clang-format' },
         rust = { 'rustfmt' },
         json = { 'prettier' },
         yaml = { 'prettier' },
