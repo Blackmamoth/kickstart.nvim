@@ -352,6 +352,8 @@ require('lazy').setup({
     },
   },
   -- lazy.nvim
+  { 'rose-pine/neovim', name = 'rose-pine' },
+  { 'catppuccin/nvim', name = 'catppuccin', priority = 1000 },
   {
     'folke/noice.nvim',
     event = 'VeryLazy',
@@ -375,7 +377,7 @@ require('lazy').setup({
     opts = {
       bigfile = { enabled = true },
       dashboard = { enabled = true },
-      explorer = { enabled = true, hidden = true },
+      explorer = { enabled = true },
       indent = { enabled = true },
       input = { enabled = true },
       notifier = {
