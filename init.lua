@@ -1303,6 +1303,7 @@ require('lazy').setup({
         'golines', -- Go formatters
         'clang-format', -- C/C++ formatter (since you’re using clangd as LSP)
         'rustfmt', -- Rust formatter
+        'biome',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -1365,13 +1366,15 @@ require('lazy').setup({
             return { 'isort', 'black' }
           end
         end,
-        typescript = { 'eslint', 'prettier' },
-        javascript = { 'eslint', 'prettier' },
+        typescript = { 'biome' },
+        javascript = { 'biome' },
+        javascriptreact = { 'biome' },
+        typescriptreact = { 'biome' },
         bash = { 'shfmt' },
         c = { 'clang-format' },
         cpp = { 'clang-format' },
         rust = { 'rustfmt' },
-        json = { 'prettier' },
+        json = { 'biome' },
         yaml = { 'prettier' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
